@@ -39,16 +39,16 @@ pnpm vitest run tests/usecase/issue/createIssue.test.ts
 pnpm vitest run tests/integration
 ```
 
-## Architecture
+## Architecture (Onion Architecture)
 
-Four-layer DDD with manual constructor injection (no DI container):
+Domain を中心に据え、外側の層が内側のインターフェースに依存する（依存性逆転）。
 
-- **domain/** — Pure TypeScript types and business rules. Zero external dependencies (no Prisma types). Repository interfaces only (no implementations).
-- **usecase/** — Business flow orchestration. Accesses data only through domain interfaces. One file per use case.
-- **infra/** — External dependency implementations (DB via Prisma). Implements domain repository interfaces.
-- **presentation/** — HTTP routing (Hono), request/response transformation, Zod validation. No domain logic here.
+- **domain/** (最内側) — 純粋TypeScript。Entity型、Repository interface、ドメインエラー。外部依存ゼロ。
+- **usecase/** (中間) — ビジネスフロー調整。Domain interfaceのみに依存。1ファイル1ユースケース。
+- **infra/** (外側) — DB通信。Domain層のRepository interfaceを実装する。
+- **presentation/** (外側) — HTTPルーティング、Zodバリデーション。UseCaseを呼び出す。
 
-Dependency direction: `presentation → usecase → domain ← infra`
+依存方向: `presentation → usecase → domain ← infra`（外から内へ、infraはdomainを実装）
 
 ## Key Design Decisions
 
